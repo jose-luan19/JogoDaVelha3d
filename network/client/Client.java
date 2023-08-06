@@ -2,7 +2,6 @@ package network.client;
 
 import controllers.BoardController;
 import controllers.GameController;
-
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;

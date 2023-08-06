@@ -65,8 +65,6 @@ public class BoardController extends JFrame implements ActionListener {
 
         if (buttonClicked.getText().isEmpty()) {
             if (turnPlayer) {
-                
-                System.out.println("ActionPerformed" + client.getId());
 
                 String symbol = client.getId() == 0 ? "X" : "O";
                 buttonClicked.setText(symbol);
@@ -89,7 +87,6 @@ public class BoardController extends JFrame implements ActionListener {
     }
     
     public void updateBoard(int col, int row) {
-        System.out.println("ActionPerformed" + client.getId());
 
         String symbol = client.getId() == 1 ? "X" : "O";
         buttons[col][row].setText(symbol);

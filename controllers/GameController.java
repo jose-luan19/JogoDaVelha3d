@@ -10,12 +10,9 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 
 public class GameController extends JFrame {
-    
-    private static final String BACKGROUND_PATH = "img/MainPage/main_page.png";
 
     private final Settings settings = new Settings();
     private Client client;
-    private JFrame allPlayersConnected;
 
     public GameController(Client client) {
         this.client = client;
@@ -72,12 +69,11 @@ public class GameController extends JFrame {
 
         settings.settingsFrame(panel,"Velha Online - Todos os Jogadores Conectados!");
 
-        allPlayersConnected = this;
     }
 
     public void mainPage() throws IOException {
 
-        ImageIcon background = new ImageIcon(BACKGROUND_PATH);
+        ImageIcon background = new ImageIcon("img/MainPage/main_page.png");
         JPanel panel = settings.createPanel(background);
     
         // Criação dos botões
@@ -108,7 +104,7 @@ public class GameController extends JFrame {
         settings.settingsFrame(panel);
     }
     public void closeAllPlayersConnected() {
-        allPlayersConnected.dispose();
+        dispose();
     }
 
 }
