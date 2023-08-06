@@ -47,7 +47,7 @@ public class Server {
 
         System.out.println("Jogador 0 conectado: " + firstConnection.getInetAddress().getHostAddress());
 
-        // cria um novo mediator para o jogador1 e inicia uma nova thread para ele
+        // cria um novo mediator para o jogador0 e inicia uma nova thread para ele
         Mediator mediatorFirstClient = new Mediator(firstConnection, socketsList, mediators);
         mediators.add(mediatorFirstClient);
         new Thread(mediatorFirstClient).start();
