@@ -15,12 +15,12 @@ import java.net.Socket;
 public class Client implements Runnable {
 
     public Socket socket;
-    private String serverAddress;
-    private int serverPort;
+    private final String serverAddress;
+    private final int serverPort;
     private BufferedReader in; //Leitura de mensagens do servidor.
     private PrintWriter out; //Envio de mensagens para o servidor.
     private int clientId;
-    private GameController gameController = new GameController(this);
+    private final GameController gameController = new GameController(this);
     private BoardController boardController;
 
     public Client(String serverAddress, int serverPort) {

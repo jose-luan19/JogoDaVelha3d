@@ -3,27 +3,27 @@ package controllers;
 import javax.swing.*;
 import java.awt.*;
 
-public class Settings extends JFrame{
-    public void settingsFrame(JPanel panel){
-        setTitle("Velha Online");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setContentPane(panel);
-        pack();
-        setResizable(false);
-        setLocationRelativeTo(null);
-        setVisible(true);
+public class Settings {
+    public static void settingsFrame(JFrame frame, JPanel panel){
+        frame.setTitle("Velha Online");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setContentPane(panel);
+        frame.pack();
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
-    public void settingsFrame(JPanel panel, String title){
-        setTitle(title);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setContentPane(panel);
-        pack();
-        setResizable(false);
-        setLocationRelativeTo(null);
-        setVisible(true);
+    public static void settingsFrame(JFrame frame, JPanel panel, String title){
+        frame.setTitle(title);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setContentPane(panel);
+        frame.pack();
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
-    public JPanel createPanel(ImageIcon background){
+    public static JPanel createPanel(ImageIcon background){
         JPanel panel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {

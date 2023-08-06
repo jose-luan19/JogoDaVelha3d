@@ -10,10 +10,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 
 public class GameController extends JFrame {
-
-    private final Settings settings = new Settings();
-    private Client client;
-
+    private final Client client;
     public GameController(Client client) {
         this.client = client;
     }
@@ -41,21 +38,19 @@ public class GameController extends JFrame {
         
         return button;
     }
-
     public void waitingForPlayersPage() {
     
         ImageIcon background = new ImageIcon("img/PlayButtonPage/waitingForPlayers.png");
     
-        JPanel panel = settings.createPanel(background);
-    
-        settings.settingsFrame(panel,"Velha Online - Conectando Jogadores!");
-    
+        JPanel panel = Settings.createPanel(background);
+
+        Settings.settingsFrame(this,panel, "Velha Online - Conectando Jogadores!");
     }  
     
     public void allPlayersConnected(){
         ImageIcon background = new ImageIcon("img/PlayButtonPage/readyToPlay.png");
 
-        JPanel panel = settings.createPanel(background);
+        JPanel panel = Settings.createPanel(background);
         
         ImageIcon startButtonIcon = new ImageIcon("img/PlayButtonPage/startButtonOff.png");
         ImageIcon startButtonHoverIcon = new ImageIcon("img/PlayButtonPage/startButtonOn.png");
@@ -67,14 +62,13 @@ public class GameController extends JFrame {
         });
         panel.add(startedButton);
 
-        settings.settingsFrame(panel,"Velha Online - Todos os Jogadores Conectados!");
-
+        Settings.settingsFrame(this, panel,"Velha Online - Todos os Jogadores Conectados!");
     }
 
     public void mainPage() throws IOException {
 
         ImageIcon background = new ImageIcon("img/MainPage/main_page.png");
-        JPanel panel = settings.createPanel(background);
+        JPanel panel = Settings.createPanel(background);
     
         // Criação dos botões
         ImageIcon playButtonIcon = new ImageIcon("img/MainPage/ButtonsActionMouse/buttonOff_03.png");
@@ -99,12 +93,11 @@ public class GameController extends JFrame {
             }
         });
         panel.add(quitButton);
-    
-        // Configuração do JFrame
-        settings.settingsFrame(panel);
+
+        Settings.settingsFrame(this, panel);
     }
     public void closeAllPlayersConnected() {
-        dispose();
+        this.dispose();
     }
 
 }

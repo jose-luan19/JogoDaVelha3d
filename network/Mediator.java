@@ -15,7 +15,7 @@ public class Mediator implements Runnable {
 
     private final Socket clientSocket;
     private final List<Socket> socketsList;
-    private List<Mediator> mediators;
+    private final List<Mediator> mediators;
     private final BufferedReader in;
     private final PrintWriter out;
     private final int id ;

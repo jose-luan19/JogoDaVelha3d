@@ -24,12 +24,9 @@ import java.util.List;
 
 public class Server {
 
-    private int port;
-    private ServerSocket serverSocket;
-    private static Socket firstConnection;
-    private static Socket secondConnection;
-    private List<Socket> socketsList = new ArrayList<>();
-    private List<Mediator> mediators = new ArrayList<>();
+    private final int port;
+    private final List<Socket> socketsList = new ArrayList<>();
+    private final List<Mediator> mediators = new ArrayList<>();
 
     public Server(int port) {
         this.port = port;
@@ -37,12 +34,12 @@ public class Server {
 
     public void start() throws IOException {
         // porta especificada na criação do servidor, podendo manter até 5 conexões e usando o endereço como o localhost(127.0.0.1)
-        serverSocket = new ServerSocket(port,5, InetAddress.getByName("localhost"));
+        ServerSocket serverSocket = new ServerSocket(port, 5, InetAddress.getByName("localhost"));
         System.out.println("Servidor iniciado na porta " + port);
         System.out.println("Aguardando conexão de jogadores...");
         System.out.println("Endereço IP do servidor: " + serverSocket.getInetAddress().getHostAddress());
 
-        firstConnection = serverSocket.accept();
+        Socket firstConnection = serverSocket.accept();
         socketsList.add(firstConnection);
 
         System.out.println("Jogador 0 conectado: " + firstConnection.getInetAddress().getHostAddress());
@@ -52,7 +49,7 @@ public class Server {
         mediators.add(mediatorFirstClient);
         new Thread(mediatorFirstClient).start();
 
-        secondConnection = serverSocket.accept();
+        Socket secondConnection = serverSocket.accept();
         socketsList.add(secondConnection);
         System.out.println("Jogador 1 conectado: " + secondConnection.getInetAddress().getHostAddress());
 
