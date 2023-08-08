@@ -91,19 +91,11 @@ public class Mediator implements Runnable {
 
                 if (message.matches("\\d, \\d, \\d")) {
                     //Recebe a mensagem referente a jogada do jogador.
-                    //id, row, col.
+                    //table, colm, row, id
                     String[] tokens = message.split(", ");
-                    int id = Integer.parseInt(tokens[2]);
-                    System.out.println(tokens[0] + tokens[1] + tokens[2]);
-                    System.out.println(id);
-                    if (turn == id) {
-                        System.out.println("Alternou");
-
-                        turn = (turn == 0) ? 1 : 0;
-                        //Manda a mensagem referente a jogada de um jogador para o outro.
-                        sendMessageToClient(turn, tokens[0] + ", " + tokens[1]);
-                    }
-                    
+                    turn = turn == 0 ? 1 : 0;
+                    //Manda a mensagem referente a jogada de um jogador para o outro.
+                    sendMessageToClient(turn, tokens[0]+", " + tokens[1] + ", " + tokens[2]);
                 }
 
                 if (message.equals("QUIT")) {

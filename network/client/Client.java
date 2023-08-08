@@ -97,12 +97,13 @@ public class Client implements Runnable {
                     }
 
                     //Coletando as coordenadas do tabuleiro e atualizando o mesmo.
-                    if (response.matches("\\d, \\d")) {
+                    if (response.matches("\\d, \\d, \\d")) {
                         String[] tokens = response.split(", ");
-                        int row = Integer.parseInt(tokens[0]);
-                        int column = Integer.parseInt(tokens[1]);
+                        int table = Integer.parseInt(tokens[0]);
+                        int row = Integer.parseInt(tokens[1]);
+                        int col = Integer.parseInt(tokens[2]);
 
-                        boardController.updateBoard(column, row);
+                        boardController.updateBoard(table, row, col);
                     }
 
                 }

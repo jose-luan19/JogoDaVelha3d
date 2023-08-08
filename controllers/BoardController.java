@@ -9,12 +9,15 @@ import java.awt.event.ActionListener;
 
 public class BoardController extends JFrame implements ActionListener {
     private boolean turnPlayer;
-    private JButton[][] buttons;
+    private JButton[][][] buttons;
     private final Client client;
     private final  ImageIcon iconTurn = new ImageIcon("img/Board/turn.png");
     private final  ImageIcon iconWait = new ImageIcon("img/Board/wait.png");
     private final JLabel labelIconTurn = new JLabel(iconTurn);
     private final JLabel labelIconWait = new JLabel(iconWait);
+    private int row;
+    private int col;
+    private int table;
 
     public void setContMoves(int contMoves) {
         this.contMoves = contMoves;
@@ -67,33 +70,41 @@ public class BoardController extends JFrame implements ActionListener {
         JPanel panel = Settings.createPanel(background);
         configLabelIcons(panel);
 
-        buttons = new JButton[3][3];
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                buttons[i][j] = new JButton();
-                buttons[i][j].setFont(new Font("Arial", Font.BOLD, 105));
-                buttons[i][j].addActionListener(this);
-                buttons[i][j].setOpaque(false);
-                buttons[i][j].setBorderPainted(false);
-                buttons[i][j].setContentAreaFilled(false);
-                panel.add(buttons[i][j]); // Adiciona o botão ao painel
+        buttons = new JButton[3][3][3];
+        for (int table = 0; table < 3; table++) {
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    buttons[table][row][col] = new JButton();
+                    buttons[table][row][col].setFont(new Font("Arial", Font.BOLD, 34));
+                    buttons[table][row][col].addActionListener(this);
+                    buttons[table][row][col].setOpaque(false);
+                    buttons[table][row][col].setBorderPainted(false);
+                    buttons[table][row][col].setContentAreaFilled(false);
+                    panel.add(buttons[table][row][col]); // Adiciona o botão ao painel
+                }
             }
         }
-
-        buttons[0][0].setBounds(120, 147, 139, 134);
-        buttons[0][1].setBounds(281, 147, 139, 134);
-        buttons[0][2].setBounds(442, 147, 139, 134);
-        buttons[1][0].setBounds(116, 308, 139, 134);
-        buttons[1][1].setBounds(281, 308, 139, 134);
-        buttons[1][2].setBounds(442, 308, 139, 134);
-        buttons[2][0].setBounds(122, 469, 139, 134);
-        buttons[2][1].setBounds(281, 469, 139, 134);
-        buttons[2][2].setBounds(442, 469, 139, 134);
+        //mapeia botões no primeiro tabuleiro
+        mapButtonsInTable(0,40);
+        mapButtonsInTable(1,290);
+        mapButtonsInTable(2,536);
 
         //Configuração da janela
         setSize(700, 700);
         setLayout(null); // Definindo um layout nulo
         Settings.settingsFrame(this, panel);
+    }
+
+    private void mapButtonsInTable(int table, int y){
+        int x = 510;
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                buttons[table][row][col].setBounds(x, y, 61, 60);
+                x += 80;
+            }
+            x = 510;
+            y += 80;
+        }
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -107,10 +118,9 @@ public class BoardController extends JFrame implements ActionListener {
                 String color = client.getId() == 0 ? "#E60067" : "#02A3D9";
                 buttonClicked.setForeground(Color.decode(color)) ;
 
-                int row = getRow(buttonClicked);
-                int column = getColumn(buttonClicked);
+                getButton(buttonClicked);
 
-                client.sendMessage(column + ", " + row + ", " + client.getId());
+                client.sendMessage(table + ", " + row + ", " + col);
 
                 contMoves++;
                 if (contMoves>2){
@@ -119,7 +129,7 @@ public class BoardController extends JFrame implements ActionListener {
                         client.sendMessage(symbol);
                     }
                 }
-                if (contMoves ==5){
+                if (contMoves == 14){
                     client.sendMessage("TIE");
                 }
                 toggleTurnPlayer();
@@ -133,68 +143,63 @@ public class BoardController extends JFrame implements ActionListener {
         tryAgain();
     }
 
-    public void updateBoard(int col, int row) {
+    public void updateBoard(int tableUsed, int row, int col) {
         String symbol = client.getId() == 1 ? "X" : "O";
-        buttons[col][row].setText(symbol);
         String color = client.getId() == 1 ? "#E60067" : "#02A3D9";
-        buttons[col][row].setForeground(Color.decode(color));
+        buttons[tableUsed][row][col].setText(symbol);
+        buttons[tableUsed][row][col].setForeground(Color.decode(color));
         toggleTurnPlayer();
     }
     
-    private int getRow(JButton button) {
-        int row = 0;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (buttons[i][j].equals(button)) {
-                    row = i;
-                    break;
+    private void getButton(JButton button) {
+        for (int table = 0; table < 3; table++) {
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    if (buttons[table][row][col].equals(button)) {
+                        this.table = table;
+                        this.row = row;
+                        this.col = col;
+                        break;
+                    }
                 }
             }
         }
-        return row;
-    }
-    
-    private int getColumn(JButton button) {
-        int column = 0;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (buttons[i][j].equals(button)) {
-                    column = j;
-                    break;
-                }
-            }
-        }
-        return column;
     }
 
     // Verifica se há um vencedor
     public boolean checkWinner(String player) {
         // Verifica linhas
-        for (int i = 0; i < 3; i++) {
-            if (buttons[i][0].getText().equals(player) &&
-                buttons[i][1].getText().equals(player) &&
-                buttons[i][2].getText().equals(player)) {
-                    return true;
+        for (int table = 0; table < 3; table++) {
+            for (int row = 0; row < 3; row++) {
+                if (buttons[table][row][0].getText().equals(player) &&
+                    buttons[table][row][1].getText().equals(player) &&
+                    buttons[table][row][2].getText().equals(player)) {
+                        return true;
+                }
             }
         }
         // Verifica colunas
-        for (int i = 0; i < 3; i++) {
-            if (buttons[0][i].getText().equals(player) &&
-                buttons[1][i].getText().equals(player) &&
-                buttons[2][i].getText().equals(player)) {
-                return true;
+        for (int table = 0; table < 3; table++) {
+            for (int col = 0; col < 3; col++) {
+                if (buttons[table][0][col].getText().equals(player) &&
+                    buttons[table][1][col].getText().equals(player) &&
+                    buttons[table][2][col].getText().equals(player)) {
+                    return true;
+                }
             }
         }
         // Verifica diagonais
-        if (buttons[0][0].getText().equals(player) &&
-            buttons[1][1].getText().equals(player) &&
-            buttons[2][2].getText().equals(player)) {
+        for (int table = 0; table < 3; table++) {
+            if(     buttons[table][0][0].getText().equals(player) &&
+                    buttons[table][1][1].getText().equals(player) &&
+                    buttons[table][2][2].getText().equals(player)) {
                 return true;
-        }
-        if (buttons[2][0].getText().equals(player) &&
-            buttons[1][1].getText().equals(player) &&
-            buttons[0][2].getText().equals(player)) {
-            return true;
+            }
+            if (    buttons[table][2][0].getText().equals(player) &&
+                    buttons[table][1][1].getText().equals(player) &&
+                    buttons[table][0][2].getText().equals(player)) {
+                return true;
+            }
         }
         return false;
     }
@@ -209,9 +214,11 @@ public class BoardController extends JFrame implements ActionListener {
     
     // Reinicia o jogo
     public void tryAgain() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                buttons[i][j].setText("");
+        for (int table = 0; table < 3; table++) {
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    buttons[table][row][col].setText("");
+                }
             }
         }
     }
