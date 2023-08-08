@@ -11,9 +11,10 @@ public class BoardController extends JFrame implements ActionListener {
     private boolean turnPlayer;
     private JButton[][] buttons;
     private final Client client;
-    private final ImageIcon iconTurn = new ImageIcon("img/Board/turn.png");
-    private final ImageIcon iconWait = new ImageIcon("img/Board/wait.png");
-    private final JPanel panelText = new JPanel();
+    private final  ImageIcon iconTurn = new ImageIcon("img/Board/turn.png");
+    private final  ImageIcon iconWait = new ImageIcon("img/Board/wait.png");
+    private final JLabel labelIconTurn = new JLabel(iconTurn);
+    private final JLabel labelIconWait = new JLabel(iconWait);
 
     public void setContMoves(int contMoves) {
         this.contMoves = contMoves;
@@ -30,28 +31,41 @@ public class BoardController extends JFrame implements ActionListener {
 
     public void toggleTurnPlayer() {
         this.turnPlayer = !this.turnPlayer;
+        changeLabelIcons();
+    }
+
+    private void changeLabelIcons(){
+        if (turnPlayer){
+            labelIconTurn.setVisible(true);
+            labelIconWait.setVisible(false);
+        }
+        else {
+            labelIconTurn.setVisible(false);
+            labelIconWait.setVisible(true);
+
+        }
+    }
+    private void configLabelIcons(JPanel panel){
+        labelIconTurn.setBounds(80,450, iconTurn.getIconWidth(), iconTurn.getIconHeight());
+        labelIconWait.setBounds(80,450, iconWait.getIconWidth(), iconWait.getIconHeight());
+        panel.add(labelIconTurn);
+        panel.add(labelIconWait);
+        changeLabelIcons();
     }
 
     public void initPage(){
         ImageIcon background;
-        JLabel labelTurn;
+
 
         if(this.turnPlayer){
-            labelTurn = new JLabel(iconTurn);
             background = new ImageIcon("img/Board/X.png");
         }
         else {
-            labelTurn = new JLabel(iconWait);
             background = new ImageIcon("img/Board/O.png");
         }
+
         JPanel panel = Settings.createPanel(background);
-        panelText.setBounds(80,450,300,120);
-
-        labelTurn.setBounds(80,450, iconTurn.getIconWidth(), iconTurn.getIconHeight());
-
-        panelText.add(labelTurn);
-        panel.add(panelText);
-
+        configLabelIcons(panel);
 
         buttons = new JButton[3][3];
         for (int i = 0; i < 3; i++) {
@@ -87,7 +101,6 @@ public class BoardController extends JFrame implements ActionListener {
             JButton buttonClicked = (JButton) e.getSource();
 
             if (buttonClicked.getText().isEmpty()) {
-                System.out.println("ActionPerformed" + client.getId());
 
                 String symbol = client.getId() == 0 ? "X" : "O";
                 buttonClicked.setText(symbol);
@@ -110,7 +123,6 @@ public class BoardController extends JFrame implements ActionListener {
                     client.sendMessage("TIE");
                 }
                 toggleTurnPlayer();
-
             }
         }
     }
@@ -125,7 +137,8 @@ public class BoardController extends JFrame implements ActionListener {
         String symbol = client.getId() == 1 ? "X" : "O";
         buttons[col][row].setText(symbol);
         String color = client.getId() == 1 ? "#E60067" : "#02A3D9";
-        buttons[col][row].setForeground(Color.decode(color)) ;
+        buttons[col][row].setForeground(Color.decode(color));
+        toggleTurnPlayer();
     }
     
     private int getRow(JButton button) {
@@ -188,7 +201,6 @@ public class BoardController extends JFrame implements ActionListener {
 
     // Mostra empate e zera os campos
     public void Tie() {
-
         JOptionPane.showMessageDialog(null, "Empate");
         System.out.println("Empate");
         tryAgain();

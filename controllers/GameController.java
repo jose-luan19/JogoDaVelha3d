@@ -44,7 +44,7 @@ public class GameController extends JFrame {
     
         JPanel panel = Settings.createPanel(background);
 
-        Settings.settingsFrame(this,panel, "Velha Online 3D- Conectando Jogadores!");
+        Settings.settingsFrame(this,panel, "Velha Online 3D - Players Connecting!");
     }  
     
     public void allPlayersConnected(){
@@ -62,7 +62,7 @@ public class GameController extends JFrame {
         });
         panel.add(startedButton);
 
-        Settings.settingsFrame(this, panel,"Velha Online 3D- Todos os Jogadores Conectados!");
+        Settings.settingsFrame(this, panel,"Velha Online 3D - All Players Connected!");
     }
 
     public void mainPage() throws IOException {

@@ -103,7 +103,6 @@ public class Client implements Runnable {
                         int column = Integer.parseInt(tokens[1]);
 
                         boardController.updateBoard(column, row);
-                        boardController.toggleTurnPlayer();
                     }
 
                 }
