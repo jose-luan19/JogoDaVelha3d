@@ -11,6 +11,9 @@ public class BoardController extends JFrame implements ActionListener {
     private boolean turnPlayer;
     private JButton[][] buttons;
     private final Client client;
+    private final ImageIcon iconTurn = new ImageIcon("img/Board/turn.png");
+    private final ImageIcon iconWait = new ImageIcon("img/Board/wait.png");
+    private final JPanel panelText = new JPanel();
 
     public void setContMoves(int contMoves) {
         this.contMoves = contMoves;
@@ -30,16 +33,25 @@ public class BoardController extends JFrame implements ActionListener {
     }
 
     public void initPage(){
+        ImageIcon background;
+        JLabel labelTurn;
 
-        ImageIcon background = new ImageIcon("img/Board/tictactoepage.png");
-
+        if(this.turnPlayer){
+            labelTurn = new JLabel(iconTurn);
+            background = new ImageIcon("img/Board/X.png");
+        }
+        else {
+            labelTurn = new JLabel(iconWait);
+            background = new ImageIcon("img/Board/O.png");
+        }
         JPanel panel = Settings.createPanel(background);
-        
-        //Configuração da janela
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(700, 700);
-        setTitle("Jogo da Velha");
-        setLayout(null); // Definindo um layout nulo
+        panelText.setBounds(80,450,300,120);
+
+        labelTurn.setBounds(80,450, iconTurn.getIconWidth(), iconTurn.getIconHeight());
+
+        panelText.add(labelTurn);
+        panel.add(panelText);
+
 
         buttons = new JButton[3][3];
         for (int i = 0; i < 3; i++) {
@@ -64,6 +76,9 @@ public class BoardController extends JFrame implements ActionListener {
         buttons[2][1].setBounds(281, 469, 139, 134);
         buttons[2][2].setBounds(442, 469, 139, 134);
 
+        //Configuração da janela
+        setSize(700, 700);
+        setLayout(null); // Definindo um layout nulo
         Settings.settingsFrame(this, panel);
     }
 
@@ -82,8 +97,6 @@ public class BoardController extends JFrame implements ActionListener {
                 int row = getRow(buttonClicked);
                 int column = getColumn(buttonClicked);
 
-                System.out.print(client.socket.isConnected());
-                System.out.println(column + ", " + row );
                 client.sendMessage(column + ", " + row + ", " + client.getId());
 
                 contMoves++;
@@ -109,8 +122,6 @@ public class BoardController extends JFrame implements ActionListener {
     }
 
     public void updateBoard(int col, int row) {
-        System.out.println("ActionPerformed");
-
         String symbol = client.getId() == 1 ? "X" : "O";
         buttons[col][row].setText(symbol);
         String color = client.getId() == 1 ? "#E60067" : "#02A3D9";

@@ -5,7 +5,7 @@ import java.awt.*;
 
 public class Settings {
     public static void settingsFrame(JFrame frame, JPanel panel){
-        frame.setTitle("Velha Online");
+        frame.setTitle("Velha Online 3D");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(panel);
         frame.pack();
