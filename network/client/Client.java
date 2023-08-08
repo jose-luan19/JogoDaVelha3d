@@ -64,8 +64,6 @@ public class Client implements Runnable {
                 while (socket.isConnected()) {
                     response = receiveMessage();
 
-                    System.out.println("Mensagem do servidor para o cliente " + clientId + ": " + response);
-
                     if (response.equals("QUIT")){
                         disconnect();
                         break;

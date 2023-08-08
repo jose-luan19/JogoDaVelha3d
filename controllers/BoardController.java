@@ -138,7 +138,6 @@ public class BoardController extends JFrame implements ActionListener {
     }
 
     public void alertWinner(String plauer){
-        System.out.println("Vencedor");
         JOptionPane.showMessageDialog(null, "Vencedor: " + plauer);
         tryAgain();
     }
@@ -165,43 +164,88 @@ public class BoardController extends JFrame implements ActionListener {
             }
         }
     }
-
-    // Verifica se há um vencedor
-    public boolean checkWinner(String player) {
-        // Verifica linhas
+    private boolean checkRow(String player){
         for (int table = 0; table < 3; table++) {
             for (int row = 0; row < 3; row++) {
                 if (buttons[table][row][0].getText().equals(player) &&
-                    buttons[table][row][1].getText().equals(player) &&
-                    buttons[table][row][2].getText().equals(player)) {
-                        return true;
-                }
-            }
-        }
-        // Verifica colunas
-        for (int table = 0; table < 3; table++) {
-            for (int col = 0; col < 3; col++) {
-                if (buttons[table][0][col].getText().equals(player) &&
-                    buttons[table][1][col].getText().equals(player) &&
-                    buttons[table][2][col].getText().equals(player)) {
+                        buttons[table][row][1].getText().equals(player) &&
+                        buttons[table][row][2].getText().equals(player)) {
                     return true;
                 }
             }
         }
-        // Verifica diagonais
+        for (int row = 0; row < 3; row++) {
+            if (    buttons[0][row][0].getText().equals(player) &&
+                    buttons[1][row][1].getText().equals(player) &&
+                    buttons[2][row][2].getText().equals(player)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean checkCol(String player){
+        for (int table = 0; table < 3; table++) {
+            for (int col = 0; col < 3; col++) {
+                if (buttons[table][0][col].getText().equals(player) &&
+                        buttons[table][1][col].getText().equals(player) &&
+                        buttons[table][2][col].getText().equals(player)) {
+                    return true;
+                }
+            }
+        }
+        for (int col = 0; col < 3; col++) {
+            if (    buttons[0][0][col].getText().equals(player) &&
+                    buttons[1][1][col].getText().equals(player) &&
+                    buttons[2][2][col].getText().equals(player)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkDiagonal(String player){
+
+        if(     buttons[0][0][0].getText().equals(player) &&
+                buttons[1][1][1].getText().equals(player) &&
+                buttons[2][2][2].getText().equals(player)) {
+            return true;
+        }
+        if (    buttons[0][0][2].getText().equals(player) &&
+                buttons[1][1][1].getText().equals(player) &&
+                buttons[2][2][0].getText().equals(player)) {
+            return true;
+        }
+
         for (int table = 0; table < 3; table++) {
             if(     buttons[table][0][0].getText().equals(player) &&
                     buttons[table][1][1].getText().equals(player) &&
                     buttons[table][2][2].getText().equals(player)) {
                 return true;
             }
-            if (    buttons[table][2][0].getText().equals(player) &&
+            if (    buttons[table][0][2].getText().equals(player) &&
                     buttons[table][1][1].getText().equals(player) &&
-                    buttons[table][0][2].getText().equals(player)) {
+                    buttons[table][2][0].getText().equals(player)) {
                 return true;
             }
         }
         return false;
+    }
+
+
+    // Verifica se há um vencedor
+    private boolean checkWinner(String player) {
+        // Verifica linhas
+        if (checkRow(player)){
+           return true;
+        }
+        // Verifica colunas
+        if (checkCol(player)){
+            return true;
+        }
+        // Verifica diagonais
+        return checkDiagonal(player);
     }
 
     // Mostra empate e zera os campos

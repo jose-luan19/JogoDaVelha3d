@@ -101,7 +101,6 @@ public class Mediator implements Runnable {
                 if (message.equals("QUIT")) {
                     sendMessageToClient(id, message);
                     mediators.remove(this);
-                    System.out.println("Cliente " + id + " desconectando...");
                     break;
                 }
 
