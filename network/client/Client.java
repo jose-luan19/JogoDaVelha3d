@@ -70,6 +70,14 @@ public class Client implements Runnable {
                         disconnect();
                         break;
                     }
+                    if (response.equals("X") || response.equals("O")) {
+                        boardController.setContMoves(0);
+                        boardController.alertWinner(response);
+                    }
+                    if (response.equals("TIE")) {
+                        boardController.setContMoves(0);
+                        boardController.Tie();
+                    }
 
                     //Recebe o id dos jogadores.
                     if (response.matches("id:\\d")) {

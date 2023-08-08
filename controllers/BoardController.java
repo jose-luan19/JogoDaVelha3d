@@ -12,8 +12,15 @@ public class BoardController extends JFrame implements ActionListener {
     private JButton[][] buttons;
     private final Client client;
 
+    public void setContMoves(int contMoves) {
+        this.contMoves = contMoves;
+    }
+
+    private int contMoves;
+
     public BoardController(Client client) {
         this.client = client;
+        // começa com o jogador 0 sendo o X, como o jogador 1 tornara isso falso
         this.turnPlayer = client.getId() == 0;
         initPage(); 
     }
@@ -57,53 +64,57 @@ public class BoardController extends JFrame implements ActionListener {
         buttons[2][1].setBounds(281, 469, 139, 134);
         buttons[2][2].setBounds(442, 469, 139, 134);
 
-        setTitle("Velha Online");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setContentPane(panel);
-        pack();
-        setResizable(false);
-        setLocationRelativeTo(null);
-        setVisible(true);
+        Settings.settingsFrame(this, panel);
     }
 
     public void actionPerformed(ActionEvent e) {
-        JButton buttonClicked = (JButton) e.getSource();
+        if (turnPlayer) {
+            JButton buttonClicked = (JButton) e.getSource();
 
-        if (buttonClicked.getText().isEmpty()) {
-            if (turnPlayer) {
-                
+            if (buttonClicked.getText().isEmpty()) {
                 System.out.println("ActionPerformed" + client.getId());
 
                 String symbol = client.getId() == 0 ? "X" : "O";
                 buttonClicked.setText(symbol);
-                String collor = client.getId() == 0 ? "#E60067" : "#02A3D9";
-                buttonClicked.setForeground(Color.decode(collor)) ;
+                String color = client.getId() == 0 ? "#E60067" : "#02A3D9";
+                buttonClicked.setForeground(Color.decode(color)) ;
 
-                int linha = getRow(buttonClicked);
-                int coluna = getColumn(buttonClicked);
+                int row = getRow(buttonClicked);
+                int column = getColumn(buttonClicked);
 
                 System.out.print(client.socket.isConnected());
-                System.out.println(coluna + ", " + linha );
-                client.sendMessage(coluna + ", " + linha + ", " + client.getId());
+                System.out.println(column + ", " + row );
+                client.sendMessage(column + ", " + row + ", " + client.getId());
 
-                checkWinner(symbol);
-                checkTie();
+                contMoves++;
+                if (contMoves>2){
+                    boolean win = checkWinner(symbol);
+                    if (win){
+                        client.sendMessage(symbol);
+                    }
+                }
+                if (contMoves ==5){
+                    client.sendMessage("TIE");
+                }
                 toggleTurnPlayer();
 
             }
         }
     }
-    
+
+    public void alertWinner(String plauer){
+        System.out.println("Vencedor");
+        JOptionPane.showMessageDialog(null, "Vencedor: " + plauer);
+        tryAgain();
+    }
+
     public void updateBoard(int col, int row) {
-        System.out.println("ActionPerformed" + client.getId());
+        System.out.println("ActionPerformed");
 
         String symbol = client.getId() == 1 ? "X" : "O";
         buttons[col][row].setText(symbol);
         String color = client.getId() == 1 ? "#E60067" : "#02A3D9";
         buttons[col][row].setForeground(Color.decode(color)) ;
-
-        checkWinner(symbol);
-        checkTie();
     }
     
     private int getRow(JButton button) {
@@ -133,53 +144,40 @@ public class BoardController extends JFrame implements ActionListener {
     }
 
     // Verifica se há um vencedor
-    public void checkWinner(String player) {
+    public boolean checkWinner(String player) {
         // Verifica linhas
         for (int i = 0; i < 3; i++) {
             if (buttons[i][0].getText().equals(player) &&
                 buttons[i][1].getText().equals(player) &&
                 buttons[i][2].getText().equals(player)) {
-                    System.out.println("Vencedor");
-                JOptionPane.showMessageDialog(null, "Vencedor: " + player);
-                tryAgain();
+                    return true;
             }
         }
         // Verifica colunas
         for (int i = 0; i < 3; i++) {
             if (buttons[0][i].getText().equals(player) &&
-                    buttons[1][i].getText().equals(player) &&
-                    buttons[2][i].getText().equals(player)) {
-                        System.out.println("Vencedor");
-                JOptionPane.showMessageDialog(null, "Vencedor: " + player);
-                tryAgain();
+                buttons[1][i].getText().equals(player) &&
+                buttons[2][i].getText().equals(player)) {
+                return true;
             }
         }
         // Verifica diagonais
         if (buttons[0][0].getText().equals(player) &&
-                buttons[1][1].getText().equals(player) &&
-                buttons[2][2].getText().equals(player)) {
-                    System.out.println("Vencedor");
-            JOptionPane.showMessageDialog(null, "Vencedor: " + player);
-            tryAgain();
+            buttons[1][1].getText().equals(player) &&
+            buttons[2][2].getText().equals(player)) {
+                return true;
         }
         if (buttons[2][0].getText().equals(player) &&
             buttons[1][1].getText().equals(player) &&
             buttons[0][2].getText().equals(player)) {
-            System.out.println("Vencedor");
-            JOptionPane.showMessageDialog(null, "Vencedor: " + player);
-            tryAgain();
+            return true;
         }
+        return false;
     }
 
-    // Verifica se há empate
-    public void checkTie() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (buttons[i][j].getText().isEmpty()) {
-                    return ;
-                }
-            }
-        }
+    // Mostra empate e zera os campos
+    public void Tie() {
+
         JOptionPane.showMessageDialog(null, "Empate");
         System.out.println("Empate");
         tryAgain();

@@ -112,6 +112,14 @@ public class Mediator implements Runnable {
                     System.out.println("Cliente " + id + " desconectando...");
                     break;
                 }
+
+                if (message.equals("X") || message.equals("O")) {
+                    broadcast(message);
+                }
+
+                if (message.equals("TIE")) {
+                    broadcast(message);
+                }
             }
         } catch (IOException e) {
             System.out.println("Error in client handler: " + e.getMessage());
