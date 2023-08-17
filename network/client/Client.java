@@ -61,13 +61,15 @@ public class Client implements Runnable {
         new Thread(() -> {
             String response = "";
             try {
+                sendMessage("CONNECTED");
                 while (socket.isConnected()) {
                     response = receiveMessage();
 
-                    if (response.equals("QUIT")){
-                        disconnect();
-                        break;
+                    if (response.matches("QUIT")) {
+                        boardController.setContMoves(0);
+                        boardController.alertWinner("X");
                     }
+
                     if (response.equals("X") || response.equals("O")) {
                         boardController.setContMoves(0);
                         boardController.alertWinner(response);
@@ -83,13 +85,13 @@ public class Client implements Runnable {
                     }
 
                     //Os dois clicaram em Play.
-                    if (response.equals("SHOW:DONE")) {
+                    if (response.equals("DONE")) {
                         //Mostrando a tela de começar o jogo.
                         gameController.allPlayersConnected();
                     }
 
                     //os dois clientes clicaram em começar o jogo.
-                    if (response.equals("SHOW:PLAY")) {
+                    if (response.equals("PLAY")) {
                         gameController.closeAllPlayersConnected();
                         boardController = new BoardController(originalThis);
                     }
@@ -118,7 +120,8 @@ public class Client implements Runnable {
             connect();
 
             //Montando interface do jogo
-            gameController.mainPage();
+            gameController.waitingForPlayersPage();
+
 
             //Chamando a Thread responsável por receber as mensagens do servidor.
             receiveMessageThread();

@@ -6,6 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class BoardController extends JFrame implements ActionListener {
     private boolean turnPlayer;
@@ -49,11 +51,37 @@ public class BoardController extends JFrame implements ActionListener {
         }
     }
     private void configLabelIcons(JPanel panel){
-        labelIconTurn.setBounds(80,450, iconTurn.getIconWidth(), iconTurn.getIconHeight());
-        labelIconWait.setBounds(80,450, iconWait.getIconWidth(), iconWait.getIconHeight());
+        labelIconTurn.setBounds(100,236, iconTurn.getIconWidth(), iconTurn.getIconHeight());
+        labelIconWait.setBounds(100,236, iconWait.getIconWidth(), iconWait.getIconHeight());
         panel.add(labelIconTurn);
         panel.add(labelIconWait);
         changeLabelIcons();
+    }
+
+    private void configQuitButton(JPanel panel){
+        ImageIcon iconQuit = new ImageIcon("img/Board/quit.png");
+        ImageIcon iconQuitHover = new ImageIcon("img/Board/quitHover.png");
+        JButton quitButton = new JButton(iconQuit);
+        quitButton.setSize(iconQuit.getIconWidth(), iconQuit.getIconHeight());
+        quitButton.setLocation(172, 744);
+        quitButton.setBorderPainted(false);
+        quitButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                quitButton.setIcon(iconQuitHover);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                quitButton.setIcon(iconQuit);
+            }
+        });
+
+        quitButton.addActionListener(action -> {
+            client.sendMessage("QUIT:" + client.getId());
+        });
+
+        panel.add(quitButton);
     }
 
     public void initPage(){
@@ -69,6 +97,7 @@ public class BoardController extends JFrame implements ActionListener {
 
         JPanel panel = Settings.createPanel(background);
         configLabelIcons(panel);
+        configQuitButton(panel);
 
         buttons = new JButton[3][3][3];
         for (int table = 0; table < 3; table++) {
@@ -138,7 +167,12 @@ public class BoardController extends JFrame implements ActionListener {
     }
 
     public void alertWinner(String plauer){
-        JOptionPane.showMessageDialog(null, "Vencedor: " + plauer);
+        JOptionPane.showMessageDialog(null, "Winner: " + plauer);
+        tryAgain();
+    }
+
+    public void alertQuitOtherPlayer(String plauer){
+        JOptionPane.showMessageDialog(null, "Winner: " + plauer);
         tryAgain();
     }
 
@@ -163,6 +197,11 @@ public class BoardController extends JFrame implements ActionListener {
                 }
             }
         }
+    }
+    private boolean checkEqualPoints(String player){
+        return buttons[0][row][col].getText().equals(player) &&
+                buttons[1][row][col].getText().equals(player) &&
+                buttons[2][row][col].getText().equals(player);
     }
     private boolean checkRow(String player){
         for (int table = 0; table < 3; table++) {
@@ -236,6 +275,10 @@ public class BoardController extends JFrame implements ActionListener {
 
     // Verifica se há um vencedor
     private boolean checkWinner(String player) {
+        // Verifica mesmo pontos nas 3 tabelas
+        if (checkEqualPoints(player)){
+            return true;
+        }
         // Verifica linhas
         if (checkRow(player)){
            return true;
@@ -250,7 +293,7 @@ public class BoardController extends JFrame implements ActionListener {
 
     // Mostra empate e zera os campos
     public void Tie() {
-        JOptionPane.showMessageDialog(null, "Empate");
+        JOptionPane.showMessageDialog(null, "Tie");
         System.out.println("Empate");
         tryAgain();
     }

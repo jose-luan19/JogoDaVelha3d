@@ -19,8 +19,8 @@ public class Mediator implements Runnable {
     private final BufferedReader in;
     private final PrintWriter out;
     private final int id ;
-    private static int actionPlayCounter = 0;
     private static int actionStartCounter = 0;
+    private static int actionPlayCounter = 0;
     private static int turn = 0;
 
     public Mediator(Socket clientSocket, List<Socket> socketsList, List<Mediator> mediators) throws IOException {
@@ -70,22 +70,22 @@ public class Mediator implements Runnable {
             while (checkIfAtLeastOnePlayerIsConnected()) {
 
                 message = receiveMessage();
-                //Evento de quando um jogador clica em Play.
-                if (message.equals("ACTION:PLAY")) {
+
+                if (message.equals("CONNECTED")) {
                     actionPlayCounter++;
-                    // Verifica se o contador chegou a 2.
+                    // Verifica se o contador chegou a 2
                     if (actionPlayCounter == 2) {
-                        // Quando a mensagem é recebida de ambos os jogadores, envia "SHOW:DONE" para eles.
-                        broadcast("SHOW:DONE");
+                        // Quando a mensagem é recebida de ambos os jogadores, envia "SHOW:PLAY" para eles.
+                        broadcast("DONE");
                     }
                 }
                 //Evento de quando os dois jogadores clicam em Começar
-                if (message.matches("ACTION:START")) {
+                if (message.equals("START")) {
                     actionStartCounter++;
                     // Verifica se o contador chegou a 2
                     if (actionStartCounter == 2) {
                         // Quando a mensagem é recebida de ambos os jogadores, envia "SHOW:PLAY" para eles.
-                        broadcast("SHOW:PLAY");
+                        broadcast("PLAY");
                     }
                 }
 
@@ -98,10 +98,14 @@ public class Mediator implements Runnable {
                     sendMessageToClient(turn, tokens[0]+", " + tokens[1] + ", " + tokens[2]);
                 }
 
-                if (message.equals("QUIT")) {
-                    sendMessageToClient(id, message);
-                    mediators.remove(this);
-                    break;
+
+                if (message.matches("QUIT:\\d")) {
+                    int id = Integer.parseInt(message.split(":")[1]);
+                    if ((id!=0)){
+                        broadcast("X");
+                    }else {
+                        broadcast("O");
+                    }
                 }
 
                 if (message.equals("X") || message.equals("O")) {
