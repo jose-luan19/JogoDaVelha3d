@@ -79,7 +79,7 @@ public class Client implements Runnable {
                         boardController.setContMoves(0);
                         String player = response.split(":")[1];
 //                        String playerWin = player == boardController.getPlayer() ?
-                        boardController.alertWinner("Player " +player+" quited of game");
+                        boardController.alertWinner("Player " +player+" desisted of game");
                         boardController.updateChat("PLAYER " + response +" DESISTED");
                     }
 
