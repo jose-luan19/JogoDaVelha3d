@@ -65,18 +65,22 @@ public class Client implements Runnable {
                 while (socket.isConnected()) {
                     response = receiveMessage();
 
-                    if (response.matches("QUIT")) {
-                        boardController.setContMoves(0);
-                        boardController.alertWinner("X");
-                    }
-
                     if (response.equals("X") || response.equals("O")) {
                         boardController.setContMoves(0);
                         boardController.alertWinner(response);
+                        boardController.updateChat("PLAYER " + response +" WINNER");
                     }
                     if (response.equals("TIE")) {
                         boardController.setContMoves(0);
                         boardController.Tie();
+                        boardController.updateChat("GAME TIE");
+                    }
+                    if (response.matches("DESIST(.*)")) {
+                        boardController.setContMoves(0);
+                        String player = response.split(":")[1];
+//                        String playerWin = player == boardController.getPlayer() ?
+                        boardController.alertWinner("Player " +player+" quited of game");
+                        boardController.updateChat("PLAYER " + response +" DESISTED");
                     }
 
                     //Recebe o id dos jogadores.
@@ -104,6 +108,9 @@ public class Client implements Runnable {
                         int col = Integer.parseInt(tokens[2]);
 
                         boardController.updateBoard(table, row, col);
+                    }
+                    if (response.matches("Player(.*)")) {
+                        boardController.updateChat(response);
                     }
 
                 }

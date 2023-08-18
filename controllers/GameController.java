@@ -31,7 +31,7 @@ public class GameController extends JFrame {
                 button.setIcon(buttonIcon);
             }
             @Override
-            public void mouseClicked(MouseEvent e) {button.setIcon(buttonHoverIcon); button.setEnabled(false);}
+            public void mouseClicked(MouseEvent e) {button.setEnabled(false);}
         });
         
         return button;

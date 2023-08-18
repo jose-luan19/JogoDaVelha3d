@@ -98,14 +98,13 @@ public class Mediator implements Runnable {
                     sendMessageToClient(turn, tokens[0]+", " + tokens[1] + ", " + tokens[2]);
                 }
 
+                if (message.matches("Player(.*)")) {
+                    broadcast(message);
+                }
 
-                if (message.matches("QUIT:\\d")) {
-                    int id = Integer.parseInt(message.split(":")[1]);
-                    if ((id!=0)){
-                        broadcast("X");
-                    }else {
-                        broadcast("O");
-                    }
+
+                if (message.matches("DESIST(.*)")) {
+                    broadcast(message);
                 }
 
                 if (message.equals("X") || message.equals("O")) {

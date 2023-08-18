@@ -11,26 +11,31 @@ import java.awt.event.MouseEvent;
 
 public class BoardController extends JFrame implements ActionListener {
     private boolean turnPlayer;
+    private final String player;
     private JButton[][][] buttons;
     private final Client client;
     private final  ImageIcon iconTurn = new ImageIcon("img/Board/turn.png");
     private final  ImageIcon iconWait = new ImageIcon("img/Board/wait.png");
     private final JLabel labelIconTurn = new JLabel(iconTurn);
     private final JLabel labelIconWait = new JLabel(iconWait);
+    private Chat chat;
     private int row;
     private int col;
     private int table;
-
-    public void setContMoves(int contMoves) {
-        this.contMoves = contMoves;
-    }
-
     private int contMoves;
+    public void setContMoves(int contMoves) {this.contMoves = contMoves;}
+    public String getPlayer(){
+        return player;
+    }
 
     public BoardController(Client client) {
         this.client = client;
         // começa com o jogador 0 sendo o X, como o jogador 1 tornara isso falso
-        this.turnPlayer = client.getId() == 0;
+        turnPlayer = client.getId() == 0;
+        if (turnPlayer)
+            player = "X";
+        else
+            player = "O";
         initPage(); 
     }
 
@@ -59,8 +64,8 @@ public class BoardController extends JFrame implements ActionListener {
     }
 
     private void configQuitButton(JPanel panel){
-        ImageIcon iconQuit = new ImageIcon("img/Board/quit.png");
-        ImageIcon iconQuitHover = new ImageIcon("img/Board/quitHover.png");
+        ImageIcon iconQuit = new ImageIcon("img/Board/desist.png");
+        ImageIcon iconQuitHover = new ImageIcon("img/Board/desistHover.png");
         JButton quitButton = new JButton(iconQuit);
         quitButton.setSize(iconQuit.getIconWidth(), iconQuit.getIconHeight());
         quitButton.setLocation(172, 744);
@@ -78,11 +83,12 @@ public class BoardController extends JFrame implements ActionListener {
         });
 
         quitButton.addActionListener(action -> {
-            client.sendMessage("QUIT:" + client.getId());
+            client.sendMessage("DESIST:" + player);
         });
 
         panel.add(quitButton);
     }
+
 
     public void initPage(){
         ImageIcon background;
@@ -98,6 +104,7 @@ public class BoardController extends JFrame implements ActionListener {
         JPanel panel = Settings.createPanel(background);
         configLabelIcons(panel);
         configQuitButton(panel);
+        chat = new Chat(client, player);
 
         buttons = new JButton[3][3][3];
         for (int table = 0; table < 3; table++) {
@@ -171,17 +178,16 @@ public class BoardController extends JFrame implements ActionListener {
         tryAgain();
     }
 
-    public void alertQuitOtherPlayer(String plauer){
-        JOptionPane.showMessageDialog(null, "Winner: " + plauer);
-        tryAgain();
-    }
-
     public void updateBoard(int tableUsed, int row, int col) {
         String symbol = client.getId() == 1 ? "X" : "O";
         String color = client.getId() == 1 ? "#E60067" : "#02A3D9";
         buttons[tableUsed][row][col].setText(symbol);
         buttons[tableUsed][row][col].setForeground(Color.decode(color));
         toggleTurnPlayer();
+    }
+
+    public void updateChat(String message) {
+        chat.updateText(message);
     }
     
     private void getButton(JButton button) {
@@ -309,4 +315,6 @@ public class BoardController extends JFrame implements ActionListener {
             }
         }
     }
+
+
 }
