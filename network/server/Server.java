@@ -1,15 +1,6 @@
-/**
- * @file Server.Java
- * @brief Arquivo principal do Jogo da Velha com Sistema Client x Servidor
- * @autor Josué Villa Real (vilareal.on@gmail.com)
- * @date 27/03/2023
- * @using JDK 19; Swing; Socket;
- */
-
 package network.server;
 
 import network.Mediator;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
