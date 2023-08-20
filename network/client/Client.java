@@ -146,16 +146,19 @@ public class Client implements Runnable {
         }
     }
 
-    private String receiveAddres(){
+    private static String receiveAddres(){
         return JOptionPane.showInputDialog("Informe o endereço IP do servidor:");
     }
-    private  int receivePort(){
+    private static int receivePort(){
         return Integer.parseInt(JOptionPane.showInputDialog("Informe a porta do servidor:"));
     }
 
     public static void main(String[] args) throws IOException {
         try {
             Client client = new Client("localhost", 5000);
+//            String ip = receiveAddres();
+//            int port = receivePort();
+//            Client client = new Client(ip, port);
             Thread thread = new Thread(client);
             thread.start();
         } catch (IllegalStateException e) {
