@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 
 public class BoardController extends JFrame implements ActionListener {
     private boolean turnPlayer;
@@ -68,7 +69,7 @@ public class BoardController extends JFrame implements ActionListener {
         ImageIcon iconQuitHover = new ImageIcon("img/Board/desistHover.png");
         JButton quitButton = new JButton(iconQuit);
         quitButton.setSize(iconQuit.getIconWidth(), iconQuit.getIconHeight());
-        quitButton.setLocation(172, 744);
+        quitButton.setLocation(110, 702);
         quitButton.setBorderPainted(false);
         quitButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -83,7 +84,8 @@ public class BoardController extends JFrame implements ActionListener {
         });
 
         quitButton.addActionListener(action -> {
-            client.sendMessage("DESIST:" + player);
+            String playerWinner = client.getId() == 0 ? "O" : "X";
+            client.sendMessage("DESIST:" + player + ":" + playerWinner );
         });
 
         panel.add(quitButton);
@@ -173,8 +175,8 @@ public class BoardController extends JFrame implements ActionListener {
         }
     }
 
-    public void alertWinner(String plauer){
-        JOptionPane.showMessageDialog(null, "Winner: " + plauer);
+    public void alert(String message){
+        JOptionPane.showMessageDialog(null, message);
         tryAgain();
     }
 
@@ -188,6 +190,21 @@ public class BoardController extends JFrame implements ActionListener {
 
     public void updateChat(String message) {
         chat.updateText(message);
+    }
+    public void updateColorsPointsWinner(String[] arrayPoints){
+        int[] first = StringFromArrayInt(arrayPoints[1]);
+        int[] second = StringFromArrayInt(arrayPoints[2]);
+        int[] third = StringFromArrayInt(arrayPoints[3]);
+        changeColorText(buttons[first[0]][first[1]][first[2]],buttons[second[0]][second[1]][second[2]],buttons[third[0]][third[1]][third[2]]);
+
+    }
+    private int[] StringFromArrayInt(String array){
+        int[] arr = new int[3];
+        String[] number = array.split(", ");
+        for (int i = 0; i < 3; i++) {
+            arr[i] = Integer.parseInt(number[i]);
+        }
+        return arr;
     }
     
     private void getButton(JButton button) {
@@ -205,24 +222,27 @@ public class BoardController extends JFrame implements ActionListener {
         }
     }
     private boolean checkEqualPoints(String player){
-        return buttons[0][row][col].getText().equals(player) &&
-                buttons[1][row][col].getText().equals(player) &&
-                buttons[2][row][col].getText().equals(player);
+        if(buttons[0][row][col].getText().equals(player) && buttons[1][row][col].getText().equals(player) && buttons[2][row][col].getText().equals(player)){
+            sendVictoryPoints(new int[]{0, row, col}, new int[]{1, row, col}, new int[]{2, row, col});
+            changeColorText(buttons[0][row][col],buttons[1][row][col],buttons[2][row][col]);
+            return true;
+        }
+        return false;
     }
     private boolean checkRow(String player){
         for (int table = 0; table < 3; table++) {
             for (int row = 0; row < 3; row++) {
-                if (buttons[table][row][0].getText().equals(player) &&
-                        buttons[table][row][1].getText().equals(player) &&
-                        buttons[table][row][2].getText().equals(player)) {
+                if(buttons[table][row][0].getText().equals(player) && buttons[table][row][1].getText().equals(player) && buttons[table][row][2].getText().equals(player)) {
+                    sendVictoryPoints(new int[]{table, row, 0}, new int[]{table, row, 1}, new int[]{table, row, 1});
+                    changeColorText(buttons[table][row][0],buttons[table][row][1],buttons[table][row][2]);
                     return true;
                 }
             }
         }
         for (int row = 0; row < 3; row++) {
-            if (    buttons[0][row][0].getText().equals(player) &&
-                    buttons[1][row][1].getText().equals(player) &&
-                    buttons[2][row][2].getText().equals(player)) {
+            if(buttons[0][row][0].getText().equals(player) &&buttons[1][row][1].getText().equals(player) && buttons[2][row][2].getText().equals(player)) {
+                sendVictoryPoints(new int[]{0, row, 0}, new int[]{1, row, 1}, new int[]{2, row, 1});
+                changeColorText(buttons[0][row][0],buttons[1][row][1],buttons[2][row][2]);
                 return true;
             }
         }
@@ -233,17 +253,17 @@ public class BoardController extends JFrame implements ActionListener {
     private boolean checkCol(String player){
         for (int table = 0; table < 3; table++) {
             for (int col = 0; col < 3; col++) {
-                if (buttons[table][0][col].getText().equals(player) &&
-                        buttons[table][1][col].getText().equals(player) &&
-                        buttons[table][2][col].getText().equals(player)) {
+                if(buttons[table][0][col].getText().equals(player) && buttons[table][1][col].getText().equals(player) && buttons[table][2][col].getText().equals(player)) {
+                    sendVictoryPoints(new int[]{table, 0, col}, new int[]{table, 1, col}, new int[]{table, 2, col});
+                    changeColorText(buttons[table][0][col],buttons[table][1][col],buttons[table][2][col]);
                     return true;
                 }
             }
         }
         for (int col = 0; col < 3; col++) {
-            if (    buttons[0][0][col].getText().equals(player) &&
-                    buttons[1][1][col].getText().equals(player) &&
-                    buttons[2][2][col].getText().equals(player)) {
+            if(buttons[0][0][col].getText().equals(player) && buttons[1][1][col].getText().equals(player) && buttons[2][2][col].getText().equals(player)) {
+                sendVictoryPoints(new int[]{0, 0, col}, new int[]{1, 1, col}, new int[]{2, 2, col});
+                changeColorText(buttons[0][0][col],buttons[1][1][col],buttons[2][2][col]);
                 return true;
             }
         }
@@ -252,26 +272,26 @@ public class BoardController extends JFrame implements ActionListener {
 
     private boolean checkDiagonal(String player){
 
-        if(     buttons[0][0][0].getText().equals(player) &&
-                buttons[1][1][1].getText().equals(player) &&
-                buttons[2][2][2].getText().equals(player)) {
+        if(buttons[0][0][0].getText().equals(player) && buttons[1][1][1].getText().equals(player) && buttons[2][2][2].getText().equals(player)) {
+            sendVictoryPoints(new int[]{0, 0, 0}, new int[]{1, 1, 1}, new int[]{2, 2, 2});
+            changeColorText(buttons[0][0][0],buttons[1][1][1],buttons[2][2][2]);
             return true;
         }
-        if (    buttons[0][0][2].getText().equals(player) &&
-                buttons[1][1][1].getText().equals(player) &&
-                buttons[2][2][0].getText().equals(player)) {
+        if(buttons[0][0][2].getText().equals(player) && buttons[1][1][1].getText().equals(player) && buttons[2][2][0].getText().equals(player)) {
+            sendVictoryPoints(new int[]{0, 0, 2}, new int[]{1, 1, 1}, new int[]{2, 2, 0});
+            changeColorText(buttons[0][0][2],buttons[1][1][1],buttons[2][2][0]);
             return true;
         }
 
         for (int table = 0; table < 3; table++) {
-            if(     buttons[table][0][0].getText().equals(player) &&
-                    buttons[table][1][1].getText().equals(player) &&
-                    buttons[table][2][2].getText().equals(player)) {
+            if(buttons[table][0][0].getText().equals(player) && buttons[table][1][1].getText().equals(player) && buttons[table][2][2].getText().equals(player)) {
+                sendVictoryPoints(new int[]{table, 0, 0}, new int[]{table, 1, 1}, new int[]{table, 2, 2});
+                changeColorText(buttons[table][0][0],buttons[table][1][1],buttons[table][2][2]);
                 return true;
             }
-            if (    buttons[table][0][2].getText().equals(player) &&
-                    buttons[table][1][1].getText().equals(player) &&
-                    buttons[table][2][0].getText().equals(player)) {
+            if(buttons[table][0][2].getText().equals(player) && buttons[table][1][1].getText().equals(player) && buttons[table][2][0].getText().equals(player)) {
+                sendVictoryPoints(new int[]{table, 0, 2}, new int[]{table, 1, 1}, new int[]{table, 2, 0});
+                changeColorText(buttons[table][0][2],buttons[table][1][1],buttons[table][2][0]);
                 return true;
             }
         }
@@ -297,6 +317,17 @@ public class BoardController extends JFrame implements ActionListener {
         return checkDiagonal(player);
     }
 
+    private void changeColorText(JButton first, JButton second, JButton third){
+        first.setForeground(Color.decode("#E4CE51"));
+        second.setForeground(Color.decode("#E4CE51"));
+        third.setForeground(Color.decode("#E4CE51"));
+    }
+
+    private void sendVictoryPoints(int[]first, int[] second, int[] third){
+        int id = client.getId() == 0 ? 1 : 0;
+        client.sendMessage(id+"("+ Arrays.toString(first) + Arrays.toString(second) + Arrays.toString(third));
+    }
+
     // Mostra empate e zera os campos
     public void Tie() {
         JOptionPane.showMessageDialog(null, "Tie");
@@ -304,7 +335,6 @@ public class BoardController extends JFrame implements ActionListener {
         tryAgain();
     }
 
-    
     // Reinicia o jogo
     public void tryAgain() {
         for (int table = 0; table < 3; table++) {

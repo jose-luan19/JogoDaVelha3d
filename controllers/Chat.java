@@ -11,11 +11,11 @@ import java.awt.event.KeyListener;
 
 public class Chat extends JFrame implements ActionListener, KeyListener {
 
-    public JTextField txtMsg;
-    private JTextArea texto;
-    public JButton btnSend;
-    public JLabel lblHistory;
-    public JLabel lblMsg;
+    private final JTextField txtMsg;
+    private final JTextArea texto;
+    private final JButton btnSend;
+    private final JLabel lblHistory;
+    private final JLabel lblMsg;
     private final Client client;
     private final String player;
 
@@ -45,11 +45,11 @@ public class Chat extends JFrame implements ActionListener, KeyListener {
         pnlContent.setBackground(Color.LIGHT_GRAY);
         texto.setBorder(BorderFactory.createEtchedBorder(Color.BLUE,Color.BLUE));
         txtMsg.setBorder(BorderFactory.createEtchedBorder(Color.BLUE, Color.BLUE));
-        setTitle("Chat");
+        setTitle("Chat - Player" + player);
         setContentPane(pnlContent);
         setLocationRelativeTo(null);
         setResizable(false);
-        setSize(250,310);
+        setSize(290,330);
         setVisible(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
@@ -61,11 +61,13 @@ public class Chat extends JFrame implements ActionListener, KeyListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         client.sendMessage("Player "+ player + ": "+ txtMsg.getText());
+            txtMsg.setText(null);
     }
     @Override
     public void keyPressed(KeyEvent e) {
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
             client.sendMessage("Player "+ player + ": "+ txtMsg.getText());
+            txtMsg.setText(null);
         }
     }
 

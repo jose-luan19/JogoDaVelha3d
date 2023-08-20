@@ -67,8 +67,8 @@ public class Client implements Runnable {
 
                     if (response.equals("X") || response.equals("O")) {
                         boardController.setContMoves(0);
-                        boardController.alertWinner(response);
-                        boardController.updateChat("PLAYER " + response +" WINNER");
+                        boardController.alert("PLAYER " + response +" WINNER");
+                        boardController.updateChat("PLAYER '" + response +"' WINNER");
                     }
                     if (response.equals("TIE")) {
                         boardController.setContMoves(0);
@@ -77,15 +77,23 @@ public class Client implements Runnable {
                     }
                     if (response.matches("DESIST(.*)")) {
                         boardController.setContMoves(0);
-                        String player = response.split(":")[1];
-//                        String playerWin = player == boardController.getPlayer() ?
-                        boardController.alertWinner("Player " +player+" desisted of game");
-                        boardController.updateChat("PLAYER " + response +" DESISTED");
+                        String playerLoser = response.split(":")[1];
+                        String playerWiner = response.split(":")[2];
+                        boardController.alert("Player '" + playerLoser + "' desisted of game. Player winner is player '" + playerWiner + "'");
+                        boardController.updateChat("PLAYER '" + playerLoser + "' DESISTED");
                     }
 
                     //Recebe o id dos jogadores.
                     if (response.matches("id:\\d")) {
                         originalThis.clientId = Integer.parseInt(response.split(":")[1]);
+                    }
+
+                    if (response.matches("(.*)\\[(.*)")) {
+                        String[] points = response.split("\\[");
+                        points[1] = points[1].replace("]","");
+                        points[2] = points[2].replace("]","");
+                        points[3] = points[3].replace("]","");
+                        boardController.updateColorsPointsWinner(points);
                     }
 
                     //Os dois clicaram em Play.

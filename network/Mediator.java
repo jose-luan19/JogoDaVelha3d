@@ -98,6 +98,13 @@ public class Mediator implements Runnable {
                     sendMessageToClient(turn, tokens[0]+", " + tokens[1] + ", " + tokens[2]);
                 }
 
+                if (message.matches("(.*)\\((.*)")){
+                    //Recebe a mensagem referente aos pontos que geram uma vitoria, e também o id do jogador perdedor
+                    String[] tokens = message.split("\\(");
+                    int id = Integer.parseInt(tokens[0]);
+                    sendMessageToClient(id, tokens[1]);
+                }
+
                 if (message.matches("Player(.*)")) {
                     broadcast(message);
                 }
