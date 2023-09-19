@@ -1,13 +1,14 @@
 package controllers;
 
 import network.client.Client;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Arrays;
+import java.rmi.RemoteException;
 
 public class BoardController extends JFrame implements ActionListener {
     private boolean turnPlayer;
@@ -18,15 +19,13 @@ public class BoardController extends JFrame implements ActionListener {
     private final  ImageIcon iconWait = new ImageIcon("img/Board/wait.png");
     private final JLabel labelIconTurn = new JLabel(iconTurn);
     private final JLabel labelIconWait = new JLabel(iconWait);
+    private JPanel panel;
     private Chat chat;
     private int row;
     private int col;
     private int table;
     private int contMoves;
     public void setContMoves(int contMoves) {this.contMoves = contMoves;}
-    public String getPlayer(){
-        return player;
-    }
 
     public BoardController(Client client) {
         this.client = client;
@@ -55,7 +54,7 @@ public class BoardController extends JFrame implements ActionListener {
 
         }
     }
-    private void configLabelIcons(JPanel panel){
+    private void configLabelIcons(){
         labelIconTurn.setBounds(100,236, iconTurn.getIconWidth(), iconTurn.getIconHeight());
         labelIconWait.setBounds(100,236, iconWait.getIconWidth(), iconWait.getIconHeight());
         panel.add(labelIconTurn);
@@ -63,7 +62,14 @@ public class BoardController extends JFrame implements ActionListener {
         changeLabelIcons();
     }
 
-    private void configQuitButton(JPanel panel){
+    public void alert(String message){
+        SwingUtilities.invokeLater(()->{
+            JOptionPane.showMessageDialog(null, message);
+            tryAgain();
+        });
+    }
+
+    private void configQuitButton(){
         ImageIcon iconQuit = new ImageIcon("img/Board/desist.png");
         ImageIcon iconQuitHover = new ImageIcon("img/Board/desistHover.png");
         JButton quitButton = new JButton(iconQuit);
@@ -84,7 +90,11 @@ public class BoardController extends JFrame implements ActionListener {
 
         quitButton.addActionListener(action -> {
             String playerWinner = client.getId() == 0 ? "O" : "X";
-            client.sendMessage("DESIST:" + player + ":" + playerWinner );
+            try {
+                Client.actionServer.Desist(playerWinner, player);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         panel.add(quitButton);
@@ -102,9 +112,9 @@ public class BoardController extends JFrame implements ActionListener {
             background = new ImageIcon("img/Board/O.png");
         }
 
-        JPanel panel = Settings.createPanel(background);
-        configLabelIcons(panel);
-        configQuitButton(panel);
+        panel = Settings.createPanel(background);
+        configLabelIcons();
+        configQuitButton();
         chat = new Chat(client, player);
 
         buttons = new JButton[3][3][3];
@@ -144,7 +154,7 @@ public class BoardController extends JFrame implements ActionListener {
         }
     }
 
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e)  {
         if (turnPlayer) {
             JButton buttonClicked = (JButton) e.getSource();
 
@@ -156,28 +166,27 @@ public class BoardController extends JFrame implements ActionListener {
                 buttonClicked.setForeground(Color.decode(color)) ;
 
                 getButton(buttonClicked);
-
-                client.sendMessage(table + ", " + row + ", " + col);
-
-                contMoves++;
-                if (contMoves>2){
-                    boolean win = checkWinner(symbol);
-                    if (win){
-                        client.sendMessage(symbol);
+                try {
+                    Client.actionServer.UpdateTable(client.getId(), table, row, col);
+                    contMoves++;
+                    if (contMoves>2){
+                        boolean win = checkWinner(symbol);
+                        if (win){
+                            Client.actionServer.PlayerWinner(symbol);
+                        }
                     }
+                    if (contMoves == 14){
+                            Client.actionServer.Tie();
+                    }
+                    toggleTurnPlayer();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
                 }
-                if (contMoves == 14){
-                    client.sendMessage("TIE");
-                }
-                toggleTurnPlayer();
             }
         }
     }
 
-    public void alert(String message){
-        JOptionPane.showMessageDialog(null, message);
-        tryAgain();
-    }
+
 
     public void updateBoard(int tableUsed, int row, int col) {
         String symbol = client.getId() == 1 ? "X" : "O";
@@ -190,21 +199,10 @@ public class BoardController extends JFrame implements ActionListener {
     public void updateChat(String message) {
         chat.updateText(message);
     }
-    public void updateColorsPointsWinner(String[] arrayPoints){
-        int[] first = StringFromArrayInt(arrayPoints[1]);
-        int[] second = StringFromArrayInt(arrayPoints[2]);
-        int[] third = StringFromArrayInt(arrayPoints[3]);
+    public void updateColorsPointsWinner(int[]first, int[] second, int[] third){
         changeColorText(buttons[first[0]][first[1]][first[2]],buttons[second[0]][second[1]][second[2]],buttons[third[0]][third[1]][third[2]]);
+    }
 
-    }
-    private int[] StringFromArrayInt(String array){
-        int[] arr = new int[3];
-        String[] number = array.split(", ");
-        for (int i = 0; i < 3; i++) {
-            arr[i] = Integer.parseInt(number[i]);
-        }
-        return arr;
-    }
     
     private void getButton(JButton button) {
         for (int table = 0; table < 3; table++) {
@@ -214,6 +212,7 @@ public class BoardController extends JFrame implements ActionListener {
                         this.table = table;
                         this.row = row;
                         this.col = col;
+
                         break;
                     }
                 }
@@ -322,16 +321,17 @@ public class BoardController extends JFrame implements ActionListener {
         third.setForeground(Color.decode("#E4CE51"));
     }
 
-    private void sendVictoryPoints(int[]first, int[] second, int[] third){
-        int id = client.getId() == 0 ? 1 : 0;
-        client.sendMessage(id+"("+ Arrays.toString(first) + Arrays.toString(second) + Arrays.toString(third));
+    private void sendVictoryPoints(int[]first, int[] second, int[] third)  {
+        try {
+            Client.actionServer.ChangeColorPointsWinners(client.getId(), first, second, third);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Mostra empate e zera os campos
     public void Tie() {
-        JOptionPane.showMessageDialog(null, "Tie");
-        System.out.println("Empate");
-        tryAgain();
+       tryAgain();
     }
 
     // Reinicia o jogo

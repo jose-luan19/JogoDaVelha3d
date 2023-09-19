@@ -1,60 +1,98 @@
 package network.server;
 
-import network.Mediator;
+import network.client.IActionsClient;
+
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.rmi.AlreadyBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 /*A Classe Server abaixo, fica responsavel por abrir a conexão do servidor em uma porta
  * e esperar pela conexão dos clientes, ápos os mesmos se conectarem, é criado uma conexão
  * entre o ServerSocket (Servidor) e os Sockets Jogador1 e Jogado2 (Clientes). as demais
  * funcionalidades são tratadas na classe "ClientHandler" */
 
-public class Server {
+public class Server extends UnicastRemoteObject implements IActionServer {
 
-    private final int port;
-    private final List<Socket> socketsList = new ArrayList<>();
-    private final List<Mediator> mediators = new ArrayList<>();
+    public static IActionsClient player1;
+    public static IActionsClient player2;
+    private static int playerDone = 0;
 
-    public Server(int port) {
-        this.port = port;
+
+    public Server() throws RemoteException {
+        super();
     }
 
-    public void start() throws IOException {
-        // porta especificada na criação do servidor, podendo manter até 5 conexões e usando o endereço como o localhost(127.0.0.1)
-        ServerSocket serverSocket = new ServerSocket(port, 5, InetAddress.getByName("localhost"));
-        System.out.println("Servidor iniciado na porta " + port);
-        System.out.println("Aguardando conexão de jogadores...");
-        System.out.println("Endereço IP do servidor: " + serverSocket.getInetAddress().getHostAddress());
-
-        Socket firstConnection = serverSocket.accept();
-        socketsList.add(firstConnection);
-
-        System.out.println("Jogador 0 conectado: " + firstConnection.getInetAddress().getHostAddress());
-
-        // cria um novo mediator para o jogador0 e inicia uma nova thread para ele
-        Mediator mediatorFirstClient = new Mediator(firstConnection, socketsList, mediators);
-        mediators.add(mediatorFirstClient);
-        new Thread(mediatorFirstClient).start();
-
-        Socket secondConnection = serverSocket.accept();
-        socketsList.add(secondConnection);
-        System.out.println("Jogador 1 conectado: " + secondConnection.getInetAddress().getHostAddress());
-
-        // cria um novo mediator para o jogador1 e inicia uma nova thread para ele
-        Mediator mediatorSecondClient = new Mediator(secondConnection, socketsList, mediators);
-        mediators.add(mediatorSecondClient);
-        new Thread(mediatorSecondClient).start();
-
+    public void CallUpdateChat(String message) throws RemoteException {
+        player1.UpdateChat(message);
+        player2.UpdateChat(message);
     }
 
-    public static void main(String[] args) {
-        Server server = new Server(5000);
+    public String Connect(String player) throws RemoteException {
+        Registry registryServer =  LocateRegistry.getRegistry("localhost");
         try {
-            server.start();
+            if (player1 == null) {
+                player1 = (IActionsClient) registryServer.lookup(player);
+                player1.setId(0);
+            }
+            else {
+                player2 = (IActionsClient) registryServer.lookup(player);
+                player2.setId(1);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        if (player1 != null && player2 != null) {
+            player1.AllPlayersConnectedToServer();
+            player2.AllPlayersConnectedToServer();
+        }
+        return player + " connected to server";
+    }
+    public void PlayerDone() throws RemoteException {
+        playerDone++;
+        if (playerDone == 2){
+            player1.AllPlayersDone();
+            player2.AllPlayersDone();
+        }
+    }
+    public void Tie() throws RemoteException {
+        player1.GameTie();
+        player2.GameTie();
+    }
+    public void PlayerWinner(String symbol) throws RemoteException {
+        player1.ShowWinner(symbol);
+        player2.ShowWinner(symbol);
+    }
+
+    public void Desist(String winner, String loser) throws RemoteException {
+        player1.PlayerDesist(winner, loser);
+        player2.PlayerDesist(winner, loser);
+    }
+
+    public void UpdateTable(int id, int table, int row, int col) throws RemoteException {
+        if (id == 1) {
+            player1.UpdateTable(table, row, col);
+        } else {
+            player2.UpdateTable(table, row, col);
+        }
+    }
+
+    public void ChangeColorPointsWinners(int id, int[] first, int[] second, int[] third) throws RemoteException {
+        if (id == 1) {
+            player1.ChangeColorsPointsWinners(first, second, third);
+        } else {
+            player2.ChangeColorsPointsWinners(first, second, third);
+        }
+    }
+
+    public static void main(String[] args) throws AlreadyBoundException, RemoteException {
+
+        Server server = new Server();
+        try {
+            Registry registryServer = LocateRegistry.createRegistry(1099);
+            registryServer.bind("Server", server);
         } catch (IOException e) {
             System.out.println("Erro ao iniciar o servidor: " + e.getMessage());
         }

@@ -5,11 +5,10 @@ import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.rmi.RemoteException;
 
 public class GameController extends JFrame {
-    private final Client client;
-    public GameController(Client client) {
-        this.client = client;
+    public GameController() {
     }
 
     private JButton createButton(ImageIcon buttonIcon, ImageIcon buttonHoverIcon, ActionListener actionListener) {
@@ -51,13 +50,19 @@ public class GameController extends JFrame {
         
         ImageIcon startButtonIcon = new ImageIcon("img/PlayButtonPage/startButtonOff.png");
         ImageIcon startButtonHoverIcon = new ImageIcon("img/PlayButtonPage/startButtonOn.png");
-        JButton startedButton = createButton(startButtonIcon, startButtonHoverIcon, e -> client.sendMessage("START"));
+        JButton startedButton = createButton(startButtonIcon, startButtonHoverIcon, e -> {
+            try {
+                Client.actionServer.PlayerDone();
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
         panel.add(startedButton);
 
         Settings.settingsFrame(this, panel,"Velha Online 3D - All Players Connected!");
     }
     public void closeAllPlayersConnected() {
-        this.dispose();
+        SwingUtilities.invokeLater(this::dispose);
     }
 
 }
